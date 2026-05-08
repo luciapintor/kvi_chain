@@ -12,7 +12,7 @@ class KeyIndicatorList:
         
     @property
     def aggregators(self):
-        return self._i_aggregators
+        return self._aggregators
 
     @aggregators.setter
     def aggregators(self, aggregators):
@@ -21,4 +21,4 @@ class KeyIndicatorList:
                 "The number of aggregators must be the same as the number of indicators"
             )
 
-        self._i_aggregators = aggregators
+        self._aggregators = aggregators

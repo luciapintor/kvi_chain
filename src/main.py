@@ -15,7 +15,7 @@ if __name__ == "__main__":
     kpi_aggregators = ["average", "sum", "sum"]
     
     # number of solutions
-    sol_num = 3
+    sol_num = 8
     
     # ranking parameters
     mu = 0.5
@@ -25,14 +25,29 @@ if __name__ == "__main__":
     kvis = KeyIndicatorList(names=kvi_names, aggregators=kvi_aggregators)
     kpis = KeyIndicatorList(names=kpi_names, aggregators=kpi_aggregators)
     
-    # request model
-    v = np.random.rand(len(kvis))
-    # weights
-    w = np.random.rand(len(kvis))
+    # kvi request and weights
+    v = np.array([0.8, 0.5, 0.5, 0.5])
+    w = np.array([0.25, 0.25, 0.25, 0.25])
+    
+    # kpi minimal performance and weights
+    p = np.array([0.1, 0.2, 0.3])
+    l = np.array([0.1, 0.2, 0.3])
+    
+    # service instantiation
+    streaming_service_1 = StreamingService(kvis=kvis, kvi_values=[0.1,0.1,0.1,0.1], kpis=kpis, kpi_values=[0.9,0.5,0.8])
+    streaming_service_2 = StreamingService(kvis=kvis, kvi_values=[0.2,0.2,0.2,0.2], kpis=kpis, kpi_values=[0.9,0.5,0.8])
+    renewable_energy_service_1 = RenewableEnergyService(kvis=kvis, kvi_values=[0.9,0.3,0.3,0.3], kpis=kpis, kpi_values=[0.1,0.2,0.3])
+    renewable_energy_service_2 = RenewableEnergyService(kvis=kvis, kvi_values=[0.8,0.4,0.4,0.4], kpis=kpis, kpi_values=[0.1,0.2,0.3])
     
     # solution matrix
-    s = Solution(kvis=kvis, kvi_aggregators=kvi_aggregators)
+    solutions = [
+        Solution(services=[streaming_service_1, renewable_energy_service_1], kvi_request=v, kvi_weights=w, kpi_minimal_performance=p, kpi_weights=l), 
+        Solution(services=[streaming_service_1, renewable_energy_service_2], kvi_request=v, kvi_weights=w, kpi_minimal_performance=p, kpi_weights=l),
+        Solution(services=[streaming_service_2, renewable_energy_service_1], kvi_request=v, kvi_weights=w, kpi_minimal_performance=p, kpi_weights=l),
+        Solution(services=[streaming_service_2, renewable_energy_service_2], kvi_request=v, kvi_weights=w, kpi_minimal_performance=p, kpi_weights=l),
+    ]
     
     # get the ranking of the solutions
-    s.rank_solutions(v, w, mu, e_m)
+    for i, s in enumerate(solutions):
+        print(f"Solution {i+1} ranking: {s.rank_single_solution(mu=mu, e_m=e_m)}")
         

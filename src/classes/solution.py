@@ -1,58 +1,51 @@
 import numpy as np
 
 class Solution:
-    def __init__(self, kvis, kvi_aggregators):
-        self.kvis = kvis
-        self.kvi_aggregators = kvi_aggregators
+    """
+    A solution is a service chain calculated given all the services available in the network.
+    Each service has its own indicators that are used to rank the solution.
+    """
+    
+    def __init__(self, services, kvi_request, kvi_weights, kpi_minimal_performance, kpi_weights):
         
-        self.sol_num = 6
-        self.s = np.random.rand(self.sol_num, len(kvis))
+        self.services = services
         
-    def __iter__(self):
-        for i in range(self.sol_num):
-            yield self.s[i]
-
-    def __rank_single_solution(self, v, w, s_m, mu=0.5, e_m=0.1):
+        # requests and weights for the ranking
+        self.kvi_request = kvi_request
+        self.kvi_weights = kvi_weights
+        self.kpi_minimal_performance = kpi_minimal_performance
+        self.kpi_weights = kpi_weights
+        
+        # cumulative indicators of the solution
+        self.services_kvi = np.random.rand(len(services[0].kvis)) # todo: this should be calculated as the aggregation of the kvis of the services in the solution
+        self.services_kpi = np.random.rand(len(services[0].kpis)) # todo: this should be calculated as the aggregation of the kpis of the services in the solution    
+        
+        # calculate the ranking of the solution
+        self.s_performance = self.calculate_kpi_performance()
+        
+    def calculate_cumulative_indicators(self):
+        # calculate the cumulative indicators of the solution as the aggregation of the indicators of the services in the solution
+        pass
+    
+    def calculate_kpi_performance(self):
+        # calculate the performance of the solution for each kpi
+        pass
+    
+    def rank_single_solution(self, mu=0.5, e_m=0.0):
         """
         The ranking is calculated for each solution s_m through a sigmoid function of
         the summatory of the difference between v_n and s_mn multiplied by w_n.
 
         Args:
-            v (_type_): is an array of values for each kvi, where v_n is the value of the n-th kvi.
-            w (_type_): is an array of weights for each kvi, where w_n is the weight of the n-th kvi.
-            s_m (_type_): is an array of solutions, where s_mn is the value of the n-th kvi in the m-th solution.
             mu (float, optional): is a parameter to balance the sustanability and the performance of the solution. 
             e_m (float, optional): is a cost parameter to take in account performance degradation and cost increase
         """
         
-        ranking = []
-        for s_n in s_m:
-            score = 0
-            for n in range(len(v)):
-                score += w[n] * (v[n] - s_n)
-            ranking.append(1/(1+np.exp(-mu*score + e_m)))
+        score = 0.0
+        
+        for n in range(len(self.kvi_request)):
+            score += (self.kvi_request[n] - self.services_kvi[n]) * self.kvi_weights[n]
             
-        # now sum up the ranking and get the final value 
-        return (1 - mu) * sum(ranking) + mu * e_m
-    
-    def rank_solutions(self, v, w, mu=0.5, e_m=0.1):
-        """
-        This method ranks all the calculated solutions
-
-        Args:
-            v (_type_): _description_
-            w (_type_): _description_
-            mu (float, optional): _description_. Defaults to 0.5.
-            e_m (float, optional): _description_. Defaults to 0.1.
-
-        Returns:
-            _type_: _description_
-        """
+        self.s_value = (1 - mu) * score + mu * e_m
         
-        ranking = []
-        
-        for i, s_m in enumerate(self):
-            ranking.append(self.__rank_single_solution(v, w, s_m, mu, e_m))
-            print(f"Ranking of solution {i}: {ranking[-1]}")
-        return ranking
-    
+        return self.s_value
