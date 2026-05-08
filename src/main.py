@@ -41,13 +41,15 @@ if __name__ == "__main__":
     
     # solution matrix
     solutions = [
-        Solution(services=[streaming_service_1, renewable_energy_service_1], kvi_request=v, kvi_weights=w, kpi_minimal_performance=p, kpi_weights=l), 
-        Solution(services=[streaming_service_1, renewable_energy_service_2], kvi_request=v, kvi_weights=w, kpi_minimal_performance=p, kpi_weights=l),
-        Solution(services=[streaming_service_2, renewable_energy_service_1], kvi_request=v, kvi_weights=w, kpi_minimal_performance=p, kpi_weights=l),
-        Solution(services=[streaming_service_2, renewable_energy_service_2], kvi_request=v, kvi_weights=w, kpi_minimal_performance=p, kpi_weights=l),
+        Solution(services=[streaming_service_1, renewable_energy_service_1]), 
+        Solution(services=[streaming_service_1, renewable_energy_service_2]),
+        Solution(services=[streaming_service_2, renewable_energy_service_1]),
+        Solution(services=[streaming_service_2, renewable_energy_service_2]),
     ]
     
     # get the ranking of the solutions
     for i, s in enumerate(solutions):
-        print(f"Solution {i+1} ranking: {s.rank_single_solution(mu=mu, e_m=e_m)}")
+        print(f"Solution {i+1} ranking: {
+            s.rank_single_solution(kpi_minimal_performance=p, kpi_weights=l, kvi_request=v, kvi_weights=w, mu=mu, e_m=e_m)
+            }")
         
