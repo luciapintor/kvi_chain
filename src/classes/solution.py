@@ -1,8 +1,9 @@
 import numpy as np
 
 class Solution:
-    def __init__(self, kvis):
+    def __init__(self, kvis, kvi_aggregators):
         self.kvis = kvis
+        self.kvi_aggregators = kvi_aggregators
         
         self.sol_num = 6
         self.s = np.random.rand(self.sol_num, len(kvis))
