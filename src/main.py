@@ -50,6 +50,6 @@ if __name__ == "__main__":
     # get the ranking of the solutions
     for i, s in enumerate(solutions):
         print(f"Solution {i+1} ranking: {
-            s.rank_single_solution(kpi_minimal_performance=p, kpi_weights=l, kvi_request=v, kvi_weights=w, mu=mu, e_m=e_m)
+            s.rank_single_solution(kpi_minimal_performance=p, kpi_weights=l, kvi_request=v, kvi_weights=w, mu=mu)
             }")
         

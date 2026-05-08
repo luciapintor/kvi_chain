@@ -50,7 +50,8 @@ class Solution:
         return cumulative_indicator_values          
             
     def calculate_kpi_performance(self, kpi_minimal_performance, kpi_weights):
-        # calculate the performance of the solution for each kpi
+        # calculate the performance of the solution for each kpi given 
+        # the minimal performance required for each kpi and the weights of each kpi in the ranking of the solution
         s_performance = []
         
         for i in range(len(self.cumulative_services_kpi)):
@@ -59,14 +60,11 @@ class Solution:
         
         return sum(s_performance)
 
-    def rank_single_solution(self, kpi_minimal_performance, kpi_weights, kvi_request, kvi_weights, mu=0.5, e_m=0.0):
+    def rank_single_solution(self, kpi_minimal_performance, kpi_weights, kvi_request, kvi_weights, mu=0.5):
         """
         The ranking is calculated for each solution s_m through a sigmoid function of
-        the summatory of the difference between v_n and s_mn multiplied by w_n.
-
-        Args:
-            mu (float, optional): is a parameter to balance the sustanability and the performance of the solution. 
-            e_m (float, optional): is a cost parameter to take in account performance degradation and cost increase
+        the summatory of the difference between the kvi request and the cumulative kvi of the solution, 
+        weighted by the kvi weights, and the performance of the solution for each kpi, weighted by the kpi weights.
         """
         
         s_performance = self.calculate_kpi_performance(kpi_minimal_performance, kpi_weights)
