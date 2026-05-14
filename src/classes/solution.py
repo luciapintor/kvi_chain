@@ -9,71 +9,66 @@ class Solution:
     def __init__(self, services):
         
         self.services = services
+        self.kvis = services[0].kvis # we assume all the services in the solution have the same kvis
         
         # cumulative indicators of the solution
-        self.cumulative_services_kvi = self.calculate_cumulative_indicators(cumulate_kvis=True)
-        self.cumulative_services_kpi = self.calculate_cumulative_indicators(cumulate_kvis=False)
+        self.chain_kvis = self.get_chain_kvis()
         
-    def calculate_cumulative_indicators(self, cumulate_kvis=True):
+    def get_chain_kvis(self):
         # calculate the cumulative indicators of the solution as the aggregation of the indicators of the services in the solution
         
-        cumulative_indicator_values = []
+        chain_kvis = []
         
         if len(self.services) == 0:
             raise ValueError("The solution must have at least one service")
         
-        if cumulate_kvis:
-            # aggregate the kvis of the services in the solution
-            indicator_names = self.services[0].kvis.names
-            indicator_aggregators = self.services[0].kvis.aggregators
-            indicator_values = np.array([s.kvi_values for s in self.services])
-        else:
-            # aggregate the kpis of the services in the solution
-            indicator_names = self.services[0].kpis.names
-            indicator_aggregators = self.services[0].kpis.aggregators
-            indicator_values = np.array([s.kpi_values for s in self.services])
-            
-        for i in range(len(indicator_names)):
-            if indicator_aggregators[i] == "average":
-                cumulative_indicator_values.append(np.mean(indicator_values[:,i]))
-            elif indicator_aggregators[i] == "weighted_average":
-                cumulative_indicator_values.append(np.average(indicator_values[:,i])) #TODO: add weights to the average 
-            elif indicator_aggregators[i] == "sum":
-                cumulative_indicator_values.append(np.sum(indicator_values[:,i]))
-            elif indicator_aggregators[i] == "min":
-                cumulative_indicator_values.append(np.min(indicator_values[:,i]))
-            elif indicator_aggregators[i] == "max":
-                cumulative_indicator_values.append(np.max(indicator_values[:,i]))
+        # pivoting the kvi values of the services
+        services_kvis = np.matrix([s.kvi_values for s in self.services])
+        
+        for i in range(len(self.kvis.aggregators)):
+            if self.kvis.aggregators[i] == "average":
+                chain_kvis.append(np.mean(services_kvis[:,i]))
+            elif self.kvis.aggregators[i] == "weighted_average":
+                chain_kvis.append(np.average(services_kvis[:,i])) #TODO: add weights to the average 
+            elif self.kvis.aggregators[i] == "sum":
+                chain_kvis.append(np.sum(services_kvis[:,i]))
+            elif self.kvis.aggregators[i] == "min":
+                chain_kvis.append(np.min(services_kvis[:,i]))
+            elif self.kvis.aggregators[i] == "max":
+                chain_kvis.append(np.max(services_kvis[:,i]))
             else:
-                raise ValueError(f"Invalid aggregation method: {indicator_aggregators[i]}")
-        
-        return cumulative_indicator_values          
+                raise ValueError(f"Invalid aggregation method: {self.kvis.aggregators[i]}")
             
-    def calculate_kpi_performance(self, kpi_minimal_performance, kpi_weights):
-        # calculate the performance of the solution for each kpi given 
-        # the minimal performance required for each kpi and the weights of each kpi in the ranking of the solution
-        s_performance = []
+            # TODO: manage case of min and max because we are assuming the threshold is the minimum value to reach,
+            # but for some indicators the threshold is the maximum value to reach (e.g. delay time, energy consumption, cost)
         
-        for i in range(len(self.cumulative_services_kpi)):
-            performance = max(0.0, (kpi_minimal_performance[i] - self.cumulative_services_kpi[i])/ kpi_minimal_performance[i])
-            s_performance.append(performance * kpi_weights[i])
+        return chain_kvis          
+            
+    def calculate_chain_cost(self):
+        """
+        The cost of the solution is calculated as the sum of the costs of the services in the solution.
+        """
+        chain_cost = 0.0
         
-        return sum(s_performance)
+        for s in self.services:
+            chain_cost += s.cost
+        
+        return chain_cost
 
-    def rank_single_solution(self, kpi_minimal_performance, kpi_weights, kvi_request, kvi_weights, mu=0.5):
+    def rank_single_solution(self, kvi_request, kvi_weights, mu=0.5):
         """
         The ranking is calculated for each solution s_m through a sigmoid function of
-        the summatory of the difference between the kvi request and the cumulative kvi of the solution, 
-        weighted by the kvi weights, and the performance of the solution for each kpi, weighted by the kpi weights.
+        the summatory of the difference between the kvi request and the kvi of the solution chain, 
+        weighted by the kvi weights. The economic cost of the solution is balanced with the parameter mu.
         """
         
-        s_performance = self.calculate_kpi_performance(kpi_minimal_performance, kpi_weights)
+        s_cost = self.calculate_chain_cost()
         
         score = 0.0
         
         for n in range(len(kvi_request)):
-            score += (kvi_request[n] - self.cumulative_services_kvi[n]) * kvi_weights[n]
+            score += (kvi_request[n] - self.chain_kvis[n]) * kvi_weights[n]
             
-        self.s_value = (1 - mu) * score + mu * s_performance
+        self.s_value = (1 - mu) * score + mu * s_cost
         
         return self.s_value

@@ -1,11 +1,10 @@
 import numpy as np
 
 class Service:
-    def __init__(self, kvis, kvi_values, kpis, kpi_values):
+    def __init__(self, kvis, kvi_values, cost):
         self.kvis = kvis
         self.kvi_values = kvi_values
-        self.kpis = kpis
-        self.kpi_values = kpi_values
+        self.cost = cost
     
     @property
     def kvi_values(self):
@@ -18,35 +17,23 @@ class Service:
         if isinstance(values, list):
             values = np.array(values)
         self._kvi_values = values
-    
-    @property
-    def kpi_values(self):
-        return self._kpi_values
-    
-    @kpi_values.setter
-    def kpi_values(self, values):   
-        if len(values) != len(self.kpis):
-            raise ValueError("The number of kpi values must be equal to the number of kpis")
-        if isinstance(values, list):
-            values = np.array(values)
-        self._kpi_values = values
 
 class StreamingService(Service):
-    def __init__(self, kvis, kvi_values, kpis, kpi_values):
-        super().__init__(kvis, kvi_values, kpis, kpi_values)
+    def __init__(self, kvis, kvi_values, cost):
+        super().__init__(kvis, kvi_values, cost)
 
 class RenewableEnergyService(Service):
-    def __init__(self, kvis, kvi_values, kpis, kpi_values):
-        super().__init__(kvis, kvi_values, kpis, kpi_values)
+    def __init__(self, kvis, kvi_values, cost):
+        super().__init__(kvis, kvi_values, cost)
 
 class GenderEqualityService(Service):
-    def __init__(self, kvis, kvi_values, kpis, kpi_values):
-        super().__init__(kvis, kvi_values, kpis, kpi_values)
+    def __init__(self, kvis, kvi_values, cost):
+        super().__init__(kvis, kvi_values, cost)
 
 class WorkplaceService(Service):
-    def __init__(self, kvis, kvi_values, kpis, kpi_values):
-        super().__init__(kvis, kvi_values, kpis, kpi_values)
+    def __init__(self, kvis, kvi_values, cost):
+        super().__init__(kvis, kvi_values, cost)
 
 class InclusionService(Service):
-    def __init__(self, kvis, kvi_values, kpis, kpi_values):
-        super().__init__(kvis, kvi_values, kpis, kpi_values)
+    def __init__(self, kvis, kvi_values, cost):
+        super().__init__(kvis, kvi_values, cost)
