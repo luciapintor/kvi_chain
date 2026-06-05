@@ -18,18 +18,18 @@ class Solution:
     A lower score is better (sigmoid near 0 means sm,n >= vn for all n).
     """
     
-    def __init__(self, services):
+    def __init__(self, services, resource_weights=None):
         if len(services) == 0:
             raise ValueError("A solution must contain at least one service.")
         self.services = services
         self.kvis = services[0].kvis # we assume all the services in the solution have the same kvis
-        self.chain_kvis = self._compute_chain_kvis()
+        self.chain_kvis = self._compute_chain_kvis(resource_weights)
      
     # ------------------------------------------------------------------
     # Chain KVI aggregation
     # ------------------------------------------------------------------
  
-    def _compute_chain_kvis(self):
+    def _compute_chain_kvis(self, resource_weights=None):
         # Matrix: rows = services, cols = KVI indices
         kvi_matrix = np.array([s.kvi_values for s in self.services], dtype=float)
  
@@ -38,7 +38,7 @@ class Solution:
             col = kvi_matrix[:, i]
  
             if aggregator == "weighted_average":
-                weights = self._get_resource_weights()
+                weights = resource_weights 
                 chain_kvis.append(float(np.average(col, weights=weights)))
  
             elif aggregator == "average":

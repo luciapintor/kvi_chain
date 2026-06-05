@@ -53,18 +53,12 @@ if __name__ == "__main__":
     # resource_weight = pm,i (used only by weighted_average aggregator)
     # -----------------------------------------------------------------------
     
-    # --- StreamingService (pm,i = 0.6) ---
-    SS1 = StreamingService(kvis=kvis, kvi_values=[0.8, 0.0,  0.0,  0.0],  cost=0.2,  resource_weight=0.6)
-    SS2 = StreamingService(kvis=kvis, kvi_values=[0.8, 0.6,  0.8,  0.6],  cost=0.4,  resource_weight=0.6)
-    
-    # --- RenewableEnergyService (pm,i = 0.4) ---
-    RE1 = RenewableEnergyService(kvis=kvis, kvi_values=[0.9,  0.3,  0.3,  0.3],  cost=0.2,  resource_weight=0.4)
-    RE2 = RenewableEnergyService(kvis=kvis, kvi_values=[0.85, 0.5,  0.75, 0.5],  cost=0.3,  resource_weight=0.4)
-    
-    # --- Specialized services (pm,i = 0.2) ---
-    GE1 = GenderEqualityService(kvis=kvis, kvi_values=[0.75, 0.9,  0.7,  0.55], cost=0.25, resource_weight=0.2)
-    WP1 = WorkplaceService     (kvis=kvis, kvi_values=[0.75, 0.55, 0.95, 0.55], cost=0.25, resource_weight=0.2)
-    IN1 = InclusionService     (kvis=kvis, kvi_values=[0.75, 0.55, 0.7,  0.9],  cost=0.25, resource_weight=0.2)
+    # --- Services ---
+    S1 = Service(kvis=kvis, kvi_values=[0.0, 0.0,  0.0,  0.0],      cost=0.2)
+    S2 = Service(kvis=kvis, kvi_values=[0.8, 0.6,  0.8,  0.6],      cost=0.4)
+    S3 = Service(kvis=kvis, kvi_values=[0.9,  0.3,  0.3,  0.3],     cost=0.2)
+    S4 = Service(kvis=kvis, kvi_values=[0.85, 0.5,  0.75, 0.5],     cost=0.3)
+    S5 = Service(kvis=kvis, kvi_values=[0.75, 0.9,  0.7,  0.55],    cost=0.25)
     
         
     # -----------------------------------------------------------------------
@@ -72,12 +66,12 @@ if __name__ == "__main__":
     # -----------------------------------------------------------------------
     
     chains = {
-        "C1": Solution(services=[SS1, RE1]),        # 2 SF, low sustainability, low cost
-        "C2": Solution(services=[SS1, RE2]),        # 2 SF, improved energy
-        "C3": Solution(services=[SS2, GE1]),   # 3 SF, balanced, gender specialist — expected feasible
-        "C4": Solution(services=[SS2, WP1]),   # 3 SF, balanced, workplace specialist — expected feasible
-        "C5": Solution(services=[SS2, IN1]),   # 3 SF, min penalises SS1/RE1 social scores
-        "C6": Solution(services=[SS2, RE2, GE1, WP1, IN1]),   # 5 SF, high sustainability, high cost — expected feasible
+        "C1": Solution(services=[S1, S3], resource_weights=[0.6, 0.4]),        
+        "C2": Solution(services=[S1, S4], resource_weights=[0.6, 0.4]),        
+        "C3": Solution(services=[S2, S5], resource_weights=[0.6, 0.2]),   
+        "C4": Solution(services=[S2, S4], resource_weights=[0.6, 0.4]),   
+        "C5": Solution(services=[S2, S3], resource_weights=[0.6, 0.4]),   
+        "C6": Solution(services=[S2, S4, S5, S3, S1], resource_weights=[0.1, 0.2, 0.2, 0.2, 0.3]),   
     }
     
     # -----------------------------------------------------------------------
