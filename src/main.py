@@ -67,11 +67,11 @@ if __name__ == "__main__":
     
     chains = {
         "C1": Solution(services=[S1, S3], resource_weights=[0.6, 0.4]),        
-        "C2": Solution(services=[S1, S4], resource_weights=[0.6, 0.4]),        
-        "C3": Solution(services=[S2, S5], resource_weights=[0.6, 0.2]),   
+        "C2": Solution(services=[S2, S4], resource_weights=[0.6, 0.4]),        
+        "C3": Solution(services=[S2, S5], resource_weights=[0.8, 0.2]),   
         "C4": Solution(services=[S2, S4], resource_weights=[0.6, 0.4]),   
         "C5": Solution(services=[S2, S3], resource_weights=[0.6, 0.4]),   
-        "C6": Solution(services=[S2, S4, S5, S3, S1], resource_weights=[0.1, 0.2, 0.2, 0.2, 0.3]),   
+        "C6": Solution(services=[S2, S4, S5, S3], resource_weights=[0.1, 0.2, 0.2, 0.5]),   
     }
     
     # -----------------------------------------------------------------------
@@ -88,6 +88,7 @@ if __name__ == "__main__":
     
     results = {}
     for name, chain in chains.items():
+        print(f"Evaluating chain {name}...")
         score = chain.rank_single_solution(kvi_request=v, kvi_weights=w, mu=mu)
         results[name] = score
     

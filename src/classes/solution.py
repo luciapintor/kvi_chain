@@ -39,6 +39,9 @@ class Solution:
  
             if aggregator == "weighted_average":
                 weights = resource_weights 
+                # check if sum of weights is 1
+                if not np.isclose(sum(weights), 1.0):
+                    print("For weighted_average, resource_weights must sum to 1.")
                 chain_kvis.append(float(np.average(col, weights=weights)))
  
             elif aggregator == "average":
@@ -61,24 +64,6 @@ class Solution:
  
         return np.array(chain_kvis)      
     
-    def _get_resource_weights(self):
-        """
-        Extract pm,i weights from each service.
-        If resource_weight is not set, fall back to uniform weights.
-        Weights are normalised so they sum to 1.
-        """
-        weights = np.array(
-            [
-                s.resource_weight if s.resource_weight is not None else 1.0
-                for s in self.services
-            ],
-            dtype=float,
-        )
-        total = weights.sum()
-        if total == 0:
-            raise ValueError("Sum of resource weights is zero.")
-        return weights / total
- 
     # ------------------------------------------------------------------
     # Cost
     # ------------------------------------------------------------------
