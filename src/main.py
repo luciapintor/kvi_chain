@@ -12,24 +12,10 @@ n=2  Gender Equality Index        (SDG 5)  — aggregator: min
 n=3  Workplace Quality            (SDG 8)  — aggregator: min
 n=4  Inclusion / Anti-discrim.    (SDG 10) — aggregator: min
  
-Request : V = [0.8, 0.5, 0.7, 0.5]
-Weights : W = [0.25, 0.25, 0.25, 0.25]
-mu      : 0.5  (equal trade-off between sustainability gap and cost)
- 
-Service function instances
---------------------------
-StreamingService   — resource_weight = 0.6  (dominant processing share)
-RenewableEnergy    — resource_weight = 0.4  (secondary processing share)
-For 3-function chains the weights are re-normalised automatically.
- 
-Chain definitions
------------------
-C1 : SS1 + RE1          (2 SF, low sustainability, low cost)
-C2 : SS1 + RE2          (2 SF, improved energy)
-C3 : SS2 + RE2          (2 SF, balanced)
-C4 : SS2 + RE3          (2 SF, high energy + good social)
-C5 : SS1 + RE1 + RE2    (3 SF, min penalises SS1/RE1 social scores)
-C6 : SS3 + RE2 + RE3    (3 SF, high sustainability, high cost)
+Request : e.g., V = [0.8, 0.5, 0.7, 0.5]
+Weights : e.g., W = [0.25, 0.25, 0.25, 0.25]
+mu      : e.g., mu = 0.5  (trade-off between sustainability gap and cost)
+
 """
 
 import sys
@@ -57,9 +43,9 @@ if __name__ == "__main__":
     # Request and ranking parameters
     # -----------------------------------------------------------------------
     
-    v  = np.array([0.8,  0.5,  0.7,  0.5])   # KVI targets
+    v = np.array([0.8, 0.6, 0.7, 0.6])       # KVI targets
     w  = np.array([0.25, 0.25, 0.25, 0.25])  # equal weights
-    mu = 0.5                                  # sustainability / cost trade-off
+    mu = 0.5                                 # sustainability / cost trade-off
     
     # -----------------------------------------------------------------------
     # Service function instances
@@ -67,37 +53,18 @@ if __name__ == "__main__":
     # resource_weight = pm,i (used only by weighted_average aggregator)
     # -----------------------------------------------------------------------
     
-    # --- StreamingService ---
-    SS1 = StreamingService(kvis=kvis,
-                        kvi_values=[0.4, 0.3, 0.4, 0.3],
-                        cost=0.2,
-                        resource_weight=0.6)
+    # --- StreamingService (pm,i = 0.6) ---
+    SS1 = StreamingService(kvis=kvis, kvi_values=[0.8, 0.0,  0.0,  0.0],  cost=0.2,  resource_weight=0.6)
+    SS2 = StreamingService(kvis=kvis, kvi_values=[0.8, 0.6,  0.8,  0.6],  cost=0.4,  resource_weight=0.6)
     
-    SS2 = StreamingService(kvis=kvis,
-                        kvi_values=[0.6, 0.5, 0.75, 0.5],
-                        cost=0.3,
-                        resource_weight=0.6)
+    # --- RenewableEnergyService (pm,i = 0.4) ---
+    RE1 = RenewableEnergyService(kvis=kvis, kvi_values=[0.9,  0.3,  0.3,  0.3],  cost=0.2,  resource_weight=0.4)
+    RE2 = RenewableEnergyService(kvis=kvis, kvi_values=[0.85, 0.5,  0.75, 0.5],  cost=0.3,  resource_weight=0.4)
     
-    SS3 = StreamingService(kvis=kvis,
-                        kvi_values=[0.8, 0.7, 0.8, 0.6],
-                        cost=0.4,
-                        resource_weight=0.6)
-    
-    # --- RenewableEnergyService ---
-    RE1 = RenewableEnergyService(kvis=kvis,
-                                kvi_values=[0.9, 0.3, 0.3, 0.3],
-                                cost=0.2,
-                                resource_weight=0.4)
-    
-    RE2 = RenewableEnergyService(kvis=kvis,
-                                kvi_values=[0.85, 0.5, 0.75, 0.5],
-                                cost=0.3,
-                                resource_weight=0.4)
-    
-    RE3 = RenewableEnergyService(kvis=kvis,
-                                kvi_values=[0.95, 0.7, 0.9, 0.7],
-                                cost=0.4,
-                                resource_weight=0.4)
+    # --- Specialized services (pm,i = 0.2) ---
+    GE1 = GenderEqualityService(kvis=kvis, kvi_values=[0.75, 0.9,  0.7,  0.55], cost=0.25, resource_weight=0.2)
+    WP1 = WorkplaceService     (kvis=kvis, kvi_values=[0.75, 0.55, 0.95, 0.55], cost=0.25, resource_weight=0.2)
+    IN1 = InclusionService     (kvis=kvis, kvi_values=[0.75, 0.55, 0.7,  0.9],  cost=0.25, resource_weight=0.2)
     
         
     # -----------------------------------------------------------------------
@@ -107,10 +74,10 @@ if __name__ == "__main__":
     chains = {
         "C1": Solution(services=[SS1, RE1]),        # 2 SF, low sustainability, low cost
         "C2": Solution(services=[SS1, RE2]),        # 2 SF, improved energy
-        "C3": Solution(services=[SS2, RE2]),        # 2 SF, balanced
-        "C4": Solution(services=[SS3, RE2]),        # 2 SF, high sustainability — expected feasible
-        "C5": Solution(services=[SS1, RE1, RE2]),   # 3 SF, min penalises SS1/RE1 social scores
-        "C6": Solution(services=[SS3, RE2, RE3]),   # 3 SF, high sustainability, high cost — expected feasible
+        "C3": Solution(services=[SS2, GE1]),   # 3 SF, balanced, gender specialist — expected feasible
+        "C4": Solution(services=[SS2, WP1]),   # 3 SF, balanced, workplace specialist — expected feasible
+        "C5": Solution(services=[SS2, IN1]),   # 3 SF, min penalises SS1/RE1 social scores
+        "C6": Solution(services=[SS2, RE2, GE1, WP1, IN1]),   # 5 SF, high sustainability, high cost — expected feasible
     }
     
     # -----------------------------------------------------------------------
